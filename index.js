@@ -24,7 +24,7 @@ let checkSitemap = (event, context, callback) => {
     if (results.every((val, index) => val)) {
       callback(null, 'Sitemap is up-to-date');
     } else {
-      callback(null, 'Sitemap is out-of-date');
+      callback(new Error('Sitemap is out-of-date'));
     }
   });
 };
