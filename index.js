@@ -12,11 +12,15 @@ let checkSitemap = (event, context, callback) => {
     fs.unlink(directoryPath + 'sitemap.xml');
   if (fs.exists(directoryPath + 'sitemap.xml.gz'))
     fs.unlink(directoryPath + 'sitemap.xml.gz');
+  let promises = [];
+  if (process.env.SITEMAP_URL !== null) {
+    promises.push(axios.get(process.env.SITEMAP_URL).then(x => checkHomePageDate(x.data)))
+  }
+  if (process.env.SITEMAP_GZIP_URL !== null) {
+    promises.push(fetchXml().then(checkHomePageDate))
+  }
   
-  Promise.all([
-    axios.get(process.env.SITEMAP_URL).then(x => checkHomePageDate(x.data)),
-    fetchXml().then(checkHomePageDate)
-  ]).then((results) => {
+  Promise.all(promises).then((results) => {
     if (results.every((val, index) => val)) {
       callback(null, 'Sitemap is up-to-date');
     } else {
@@ -33,7 +37,8 @@ let checkHomePageDate = (homepageXML) => {
         let date = result.urlset.url[0].lastmod[0];
         let diff_date = (Date.now() - Date.parse(date)) / 3600000;
         console.log(diff_date);
-        resolve(diff_date < 24);
+        const threshold = process.env.DATE_THRESHOLD || 24;
+        resolve(diff_date < threshold);
       } else {
         reject(err);
       }
