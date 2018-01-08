@@ -4,6 +4,7 @@ const http = require('http');
 const fs = require('fs');
 const zlib = require('zlib');
 const unzip = zlib.createUnzip();
+const Slack = require('slack-node');
 const directoryPath = '/tmp/';
 
 let checkSitemap = (event, context, callback) => {
@@ -24,6 +25,19 @@ let checkSitemap = (event, context, callback) => {
     if (results.every((val, index) => val)) {
       callback(null, 'Sitemap is up-to-date');
     } else {
+      webhookUri = process.env.SLACK_WEBHOOK;
+  
+      slack = new Slack();
+      slack.setWebhook(webhookUri);
+  
+      slack.webhook({
+        channel: process.env.SLACK_WEBHOOK_CHANNEL,
+        username: "sitemap checker bot",
+        text: "Oh! Sitemap is not up-to-date! Please, check aws lambda logs!"
+      }, function(err, response) {
+        console.log(response);
+      });
+      
       callback(new Error('Sitemap is out-of-date'));
     }
   });
