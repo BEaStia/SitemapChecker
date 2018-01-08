@@ -1,0 +1,12 @@
+{
+  "name": "sitemapchecker",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "axios": "^0.17.1",
+    "xml2js": "^0.4.19"
+  }
+}
